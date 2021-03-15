@@ -3,6 +3,7 @@ package com.example.tsclientconnectivity.controllers;
 
 
 import com.example.tsclientconnectivity.models.Customer;
+import com.example.tsclientconnectivity.queue.RedisMessagePublisher;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +17,12 @@ import java.util.List;
 public class HomeController {
 
     private final List<Customer> customers=new ArrayList<>();
+    private RedisMessagePublisher publisher;
 
-    public HomeController(){
+    public HomeController(RedisMessagePublisher publisher){
         customers.add(new Customer(2,69,"Linus"));
         customers.add(new Customer(6,442069,"Prince"));
+        this.publisher=publisher;
     }
 
     
@@ -41,6 +44,12 @@ public class HomeController {
 
         return customers;
 
+    }
+
+    @GetMapping("/redis/{message}")
+    public String redisSend(@PathVariable(name = "message") String message){
+        publisher.publish(message);
+        return message;
     }
     
     @PostMapping("/client")
